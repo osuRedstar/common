@@ -7,7 +7,7 @@ from common.log import logUtils as log
 from objects import glob
 
 #def cheesegullRequest(handler, requestType="GET", key="https://api.nerina.pw/search", params=None, mustHave=None, wants=None):
-def cheesegullRequest(handler, requestType="GET", key="https://storage.ripple.moe/api/", params=None, mustHave=None, wants=None):
+def cheesegullRequest(handler, requestType="GET", key="https://osu.direct/api/", params=None, mustHave=None, wants=None):
 	"""
 	Send a request to Cheesegull
 
