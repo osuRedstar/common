@@ -22,6 +22,16 @@ def getBeatmapTime(beatmapID):
 		p = json.loads(r)['TotalLength']
  
 	return p
+
+def PPBoard(userID, relax):
+	result = glob.db.fetch("SELECT ppboard FROM {rx}_stats WHERE id = {userid}".format(rx='rx' if relax else 'users', userid=userID))
+	return result['ppboard']
+
+def setPPBoard(userID, rx, force=False):
+	glob.db.execute("UPDATE {rx}_stats SET ppboard = {boardNum} WHERE id = {userid}".format(rx='rx' if rx else 'users', boardNum="1" if not force else "2", userid=userID))
+
+def setScoreBoard(userID, rx, force=False):
+	glob.db.execute("UPDATE {rx}_stats SET ppboard = {boardNum} WHERE id = {userid}".format(rx='rx' if rx else 'users', boardNum="0" if not force else "3", userid=userID))
  
 def incrementPlaytime(userID, gameMode=0, length=0):
 	modeForDB = gameModes.getGameModeForDB(gameMode)
@@ -397,6 +407,17 @@ def calculatePP(userID, gameMode):
 	:param gameMode: game mode number
 	:return: total PP
 	"""
+
+	totalPP = glob.db.fetch(
+		f"""select sum(ROUND(ROUND(DD.pp) * pow(0.95,  (DD.RANKING-1)))) as pp
+		from(SELECT ROW_NUMBER() OVER(ORDER BY pp DESC) AS RANKING, userid,pp
+		FROM scores WHERE beatmap_md5 in
+		(select beatmap_md5 from beatmaps where ranked = 2 OR ranked = 3) AND userid = {userID} AND play_mode = {gameMode} AND completed = 3 LIMIT 500) as DD;""")
+	totalPP = totalPP["pp"]
+	gm = scoreUtils.readableGameMode(gameMode)
+	log.info("UserID {}'s {} totalPP = {}".format(userID, gm, totalPP))
+	return totalPP
+
 	# Get best pp scores
 	""" bestPPScores = glob.db.fetchAll(
 		"SELECT pp FROM scores WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
@@ -405,17 +426,7 @@ def calculatePP(userID, gameMode):
 		"SELECT pp, beatmap_md5 FROM scores WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
 		[userID, gameMode])
 
-	gm = "Unknown"
-	if gameMode == 0:
-		gm = "STD"
-	elif gameMode == 1:
-		gm = "Taiko"
-	elif gameMode == 2:
-		gm = "CTB"
-	elif gameMode == 3:
-		gm = "Mania"
-	else:
-		gm = "UNKNOWN"
+	gm = scoreUtils.readableGameMode(gameMode)
 
 	# Calculate weighted PP
 	totalPP = 0
@@ -442,6 +453,17 @@ def calculatePPRelax(userID, gameMode):
 	:param gameMode: game mode number
 	:return: total PP
 	"""
+
+	totalPP = glob.db.fetch(
+		f"""select sum(ROUND(ROUND(DD.pp) * pow(0.95,  (DD.RANKING-1)))) as pp
+		from(SELECT ROW_NUMBER() OVER(ORDER BY pp DESC) AS RANKING, userid,pp
+		FROM scores_relax WHERE beatmap_md5 in
+		(select beatmap_md5 from beatmaps where ranked = 2 OR ranked = 3) AND userid = {userID} AND play_mode = {gameMode} AND completed = 3 LIMIT 500) as DD;""")
+	totalPP = totalPP["pp"]
+	gm = scoreUtils.readableGameMode(gameMode)
+	log.info("UserID {}'s {} totalPP = {}".format(userID, gm, totalPP))
+	return totalPP
+
 	# Get best pp scores
 	""" bestPPScores = glob.db.fetchAll(
 		"SELECT pp FROM scores_relax WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
@@ -450,17 +472,7 @@ def calculatePPRelax(userID, gameMode):
 		"SELECT pp, beatmap_md5 FROM scores_relax WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
 		[userID, gameMode])
 
-	gm = "Unknown"
-	if gameMode == 0:
-		gm = "STD"
-	elif gameMode == 1:
-		gm = "Taiko"
-	elif gameMode == 2:
-		gm = "CTB"
-	elif gameMode == 3:
-		gm = "Mania"
-	else:
-		gm = "UNKNOWN"
+	gm = scoreUtils.readableGameMode(gameMode)
 
 	# Calculate weighted PP
 	totalPP = 0
@@ -649,6 +661,38 @@ def getPP(userID, gameMode):
 
 	mode = scoreUtils.readableGameMode(gameMode)
 	result = glob.db.fetch("SELECT pp_{} FROM users_stats WHERE id = %s LIMIT 1".format(mode), [userID])
+	if result is not None:
+		return result["pp_{}".format(mode)]
+	else:
+		return 0
+	
+def getPPRX(userID, gameMode):
+	"""
+	Get userID's PP relative to gameMode
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: pp
+	"""
+
+	mode = scoreUtils.readableGameMode(gameMode)
+	result = glob.db.fetch("SELECT pp_{} FROM rx_stats WHERE id = %s LIMIT 1".format(mode), [userID])
+	if result is not None:
+		return result["pp_{}".format(mode)]
+	else:
+		return 0
+	
+def getPPAP(userID, gameMode):
+	"""
+	Get userID's PP relative to gameMode
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: pp
+	"""
+
+	mode = scoreUtils.readableGameMode(gameMode)
+	result = glob.db.fetch("SELECT pp_{} FROM ap_stats WHERE id = %s LIMIT 1".format(mode), [userID])
 	if result is not None:
 		return result["pp_{}".format(mode)]
 	else:
