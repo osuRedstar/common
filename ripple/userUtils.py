@@ -17,7 +17,7 @@ from objects import glob
 def getBeatmapTime(beatmapID):
 	p = 0
 	#r = requests.get("https://redstar.moe/api/get_beatmaps?b={}".format(beatmapID)).text
-	r = requests.get("https://storage.ripple.moe/api/b/{}".format(beatmapID)).text
+	r = requests.get("https://cheesegull.redstar.moe/api/b/{}".format(beatmapID)).text
 	if r != "null\n":
 		p = json.loads(r)['TotalLength']
  
@@ -48,8 +48,15 @@ def incrementPlaytimeRX(userID, gameMode=0, length=0):
 	if result is not None:
 		glob.db.execute("UPDATE rx_stats SET playtime_{gm} = %s WHERE id = %s".format(gm=modeForDB), [(int(result['playtime'])+int(length)), userID])
 	else:
-		print("Something went wrong...")	  
- 
+		print("Something went wrong...")
+
+def incrementPlaytimeAP(userID, gameMode=0, length=0):
+	modeForDB = gameModes.getGameModeForDB(gameMode)
+	result = glob.db.fetch("SELECT playtime_{gm} as playtime FROM ap_stats WHERE id = %s".format(gm=modeForDB), [userID])
+	if result is not None:
+		glob.db.execute("UPDATE ap_stats SET playtime_{gm} = %s WHERE id = %s".format(gm=modeForDB), [(int(result['playtime'])+int(length)), userID])
+	else:
+		print("Something went wrong...") 
 
 def getUserStats(userID, gameMode):
 	"""
@@ -109,6 +116,43 @@ def getUserStatsRx(userID, gameMode):
 
 	# Get game rank
 	stats["gameRank"] = getGameRankRx(userID, gameMode)
+
+	# Return stats + game rank
+	return stats
+
+def getUserStatsAp(userID, gameMode):
+	"""
+	Get all user stats relative to `gameMode`
+
+	:param userID:
+	:param gameMode: game mode number
+	:return: dictionary with result
+	"""
+	modeForDB = gameModes.getGameModeForDB(gameMode)
+
+	# Get stats
+	if gameMode == 3:
+		stats = glob.db.fetch("""SELECT
+							ranked_score_{gm} AS rankedScore,
+							avg_accuracy_{gm} AS accuracy,
+							playcount_{gm} AS playcount,
+							total_score_{gm} AS totalScore,
+							pp_{gm} AS pp
+							FROM ap_stats WHERE id = %s LIMIT 1""".format(gm=modeForDB), [userID])
+		
+	else:
+ 
+		# Get stats
+		stats = glob.db.fetch("""SELECT
+							ranked_score_{gm} AS rankedScore,
+							avg_accuracy_{gm} AS accuracy,
+							playcount_{gm} AS playcount,
+							total_score_{gm} AS totalScore,
+							pp_{gm} AS pp
+							FROM ap_stats WHERE id = %s LIMIT 1""".format(gm=modeForDB), [userID])
+
+	# Get game rank
+	stats["gameRank"] = getGameRankAp(userID, gameMode)
 
 	# Return stats + game rank
 	return stats
@@ -325,7 +369,34 @@ def updateLevelRX(userID, gameMode=0, totalScore=0):
 	level = getLevel(totalScore)
  
 	# Save new level
-	glob.db.execute("UPDATE rx_stats SET level_{m} = %s WHERE id = %s LIMIT 1".format(m=mode), [level, userID]) 
+	glob.db.execute("UPDATE rx_stats SET level_{m} = %s WHERE id = %s LIMIT 1".format(m=mode), [level, userID])
+
+def updateLevelAP(userID, gameMode=0, totalScore=0):
+	"""
+	Update level in DB for userID relative to gameMode
+ 
+	:param userID: user id
+	:param gameMode: game mode number
+	:param totalScore: new total score
+	:return:
+	"""
+	# Make sure the user exists
+	# if not exists(userID):
+	#   return
+ 
+	# Get total score from db if not passed
+	mode = scoreUtils.readableGameMode(gameMode)
+	if totalScore == 0:
+		totalScore = glob.db.fetch(
+			"SELECT total_score_{m} as total_score FROM ap_stats WHERE id = %s LIMIT 1".format(m=mode), [userID])
+		if totalScore:
+			totalScore = totalScore["total_score"]
+ 
+	# Calculate level from totalScore
+	level = getLevel(totalScore)
+ 
+	# Save new level
+	glob.db.execute("UPDATE ap_stats SET level_{m} = %s WHERE id = %s LIMIT 1".format(m=mode), [level, userID])
 	
 def calculateAccuracy(userID, gameMode):
 	"""
@@ -398,8 +469,44 @@ def calculateAccuracyRX(userID, gameMode):
 		else:
 			v = 0
 	return v
+
+def calculateAccuracyAP(userID, gameMode):
+	"""
+	Calculate accuracy value for userID relative to gameMode
+ 
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: new accuracy
+	"""
+	# Select what to sort by
+	if gameMode == 0:
+		sortby = "pp"
+	else:
+		sortby = "accuracy"
+	# Get best accuracy scores
+	bestAccScores = glob.db.fetchAll(
+		"SELECT accuracy FROM scores_ap WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY " + sortby + " DESC LIMIT 500",
+		[userID, gameMode])
+ 
+	v = 0
+	if bestAccScores is not None:
+		# Calculate weighted accuracy
+		totalAcc = 0
+		divideTotal = 0
+		k = 0
+		for i in bestAccScores:
+			add = int((0.95 ** k) * 100)
+			totalAcc += i["accuracy"] * add
+			divideTotal += add
+			k += 1
+		# echo "$add - $totalacc - $divideTotal\n"
+		if divideTotal != 0:
+			v = totalAcc / divideTotal
+		else:
+			v = 0
+	return v
 	
-def calculatePP(userID, gameMode):
+def calculatePP(userID, gameMode, limit=500):
 	"""
 	Calculate userID's total PP for gameMode
 
@@ -412,10 +519,13 @@ def calculatePP(userID, gameMode):
 		f"""select sum(ROUND(ROUND(DD.pp) * pow(0.95,  (DD.RANKING-1)))) as pp
 		from(SELECT ROW_NUMBER() OVER(ORDER BY pp DESC) AS RANKING, userid,pp
 		FROM scores WHERE beatmap_md5 in
-		(select beatmap_md5 from beatmaps where ranked = 2 OR ranked = 3) AND userid = {userID} AND play_mode = {gameMode} AND completed = 3 LIMIT 500) as DD;""")
+		(select beatmap_md5 from beatmaps where ranked = 2 OR ranked = 3) AND userid = {userID} AND play_mode = {gameMode} AND completed = 3 LIMIT {limit}) as DD;""")
 	totalPP = totalPP["pp"]
 	gm = scoreUtils.readableGameMode(gameMode)
-	log.info("UserID {}'s {} totalPP = {}".format(userID, gm, totalPP))
+	if limit == 500:
+		log.info("UserID {}'s {} totalPP = {}".format(userID, gm, totalPP))
+	else:
+		log.info("UserID {}'s {} {} maps totalPP = {}".format(userID, gm, limit, totalPP))
 	return totalPP
 
 	# Get best pp scores
@@ -445,7 +555,7 @@ def calculatePP(userID, gameMode):
 	log.info("UserID {}'s {} totalPP = {}".format(userID, gm, totalPP))
 	return totalPP
 
-def calculatePPRelax(userID, gameMode):
+def calculatePPRelax(userID, gameMode, limit=500):
 	"""
 	Calculate userID's total PP for gameMode
 
@@ -458,10 +568,62 @@ def calculatePPRelax(userID, gameMode):
 		f"""select sum(ROUND(ROUND(DD.pp) * pow(0.95,  (DD.RANKING-1)))) as pp
 		from(SELECT ROW_NUMBER() OVER(ORDER BY pp DESC) AS RANKING, userid,pp
 		FROM scores_relax WHERE beatmap_md5 in
-		(select beatmap_md5 from beatmaps where ranked = 2 OR ranked = 3) AND userid = {userID} AND play_mode = {gameMode} AND completed = 3 LIMIT 500) as DD;""")
+		(select beatmap_md5 from beatmaps where ranked = 2 OR ranked = 3) AND userid = {userID} AND play_mode = {gameMode} AND completed = 3 LIMIT {limit}) as DD;""")
 	totalPP = totalPP["pp"]
 	gm = scoreUtils.readableGameMode(gameMode)
+	if limit == 500:
+		log.info("UserID {}'s {} totalPP = {}".format(userID, gm, totalPP))
+	else:
+		log.info("UserID {}'s {} {} maps totalPP = {}".format(userID, gm, limit, totalPP))
+	return totalPP
+
+	# Get best pp scores
+	""" bestPPScores = glob.db.fetchAll(
+		"SELECT pp FROM scores_relax WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
+		[userID, gameMode]) """
+	bestPPScores = glob.db.fetchAll(
+		"SELECT pp, beatmap_md5 FROM scores_relax WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
+		[userID, gameMode])
+
+	gm = scoreUtils.readableGameMode(gameMode)
+
+	# Calculate weighted PP
+	totalPP = 0
+	if bestPPScores is not None:
+		k = 0
+		for i in bestPPScores:
+			#럽드 감지
+			isloved = glob.db.fetchAll("SELECT ranked FROM beatmaps WHERE beatmap_md5 = %s", [i["beatmap_md5"]])
+			try:
+				if isloved[0]["ranked"] is not 5 and isloved[0]["ranked"] is not 4 and isloved[0]["ranked"] is not 0:
+					new = round(round(i["pp"]) * 0.95 ** k)
+					totalPP += new
+					k += 1
+			except:
+				log.error("UserID {}'s {}_Relax: {} 비트맵은 DB에 존재하지 않으므로 예외처리를 통해 생략함".format(userID, gm, i["beatmap_md5"]))
 	log.info("UserID {}'s {} totalPP = {}".format(userID, gm, totalPP))
+	return totalPP
+
+def calculatePPAutopilot(userID, gameMode, limit=500):
+	"""
+	Calculate userID's total PP for gameMode
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: total PP
+	"""
+
+	totalPP = glob.db.fetch(
+		f"""select sum(ROUND(ROUND(DD.pp) * pow(0.95,  (DD.RANKING-1)))) as pp
+		from(SELECT ROW_NUMBER() OVER(ORDER BY pp DESC) AS RANKING, userid,pp
+		FROM scores_ap WHERE beatmap_md5 in
+		(select beatmap_md5 from beatmaps where ranked = 2 OR ranked = 3) AND userid = {userID} AND play_mode = {gameMode} AND completed = 3 LIMIT {limit}) as DD;""")
+	totalPP = totalPP["pp"]
+	gm = scoreUtils.readableGameMode(gameMode)
+	if limit == 500:
+		log.info("UserID {}'s {} totalPP = {}".format(userID, gm, totalPP))
+	else:
+		log.info("UserID {}'s {} {} maps totalPP = {}".format(userID, gm, limit, totalPP))
 	return totalPP
 
 	# Get best pp scores
@@ -515,7 +677,20 @@ def updateAccuracyRX(userID, gameMode):
 	newAcc = calculateAccuracyRX(userID, gameMode)
 	mode = scoreUtils.readableGameMode(gameMode)
 	glob.db.execute("UPDATE rx_stats SET avg_accuracy_{m} = %s WHERE id = %s LIMIT 1".format(m=mode),
-					[newAcc, userID])   
+					[newAcc, userID])
+
+def updateAccuracyAP(userID, gameMode):
+	"""
+	Update accuracy value for userID relative to gameMode in DB
+ 
+	:param userID: user id
+	:param gameMode: gameMode number
+	:return:
+	"""
+	newAcc = calculateAccuracyAP(userID, gameMode)
+	mode = scoreUtils.readableGameMode(gameMode)
+	glob.db.execute("UPDATE ap_stats SET avg_accuracy_{m} = %s WHERE id = %s LIMIT 1".format(m=mode),
+					[newAcc, userID])
 					
 def updatePP(userID, gameMode):
 	"""
@@ -547,6 +722,22 @@ def updatePPRelax(userID, gameMode):
 
 	# Get new total PP and update db
 	newPP = calculatePPRelax(userID, gameMode)
+	mode = scoreUtils.readableGameMode(gameMode)
+	glob.db.execute("UPDATE rx_stats SET pp_{}=%s WHERE id = %s LIMIT 1".format(mode), [newPP, userID])
+
+def updatePPAutopilot(userID, gameMode):
+	"""
+	Update userID's pp with new value
+
+	:param userID: user id
+	:param gameMode: game mode number
+	"""
+	# Make sure the user exists
+	# if not exists(userID):
+	#	return
+
+	# Get new total PP and update db
+	newPP = calculatePPAutopilot(userID, gameMode)
 	mode = scoreUtils.readableGameMode(gameMode)
 	glob.db.execute("UPDATE rx_stats SET pp_{}=%s WHERE id = %s LIMIT 1".format(mode), [newPP, userID])
 
@@ -625,6 +816,44 @@ def updateStatsRx(userID, __score):
 
 		# Update pp
 		updatePPRelax(userID, __score.gameMode)
+
+def updateStatsAp(userID, __score):
+	"""
+	Update stats (playcount, total score, ranked score, level bla bla)
+	with data relative to a score object
+
+	:param userID:
+	:param __score: score object
+	"""
+
+	# Make sure the user exists
+	if not exists(userID):
+		log.warning("User {} doesn't exist.".format(userID))
+		return
+
+	# Get gamemode for db
+	mode = scoreUtils.readableGameMode(__score.gameMode)
+
+	# Update total score and playcount
+	glob.db.execute(
+		"UPDATE ap_stats SET total_score_{m}=total_score_{m}+%s, playcount_{m}=playcount_{m}+1 WHERE id = %s LIMIT 1".format(
+			m=mode), [__score.score, userID])
+
+	# Calculate new level and update it
+	updateLevelAP(userID, __score.gameMode)
+
+	# Update level, accuracy and ranked score only if we have passed the song
+	if __score.passed:
+		# Update ranked score
+		glob.db.execute(
+			"UPDATE ap_stats SET ranked_score_{m}=ranked_score_{m}+%s WHERE id = %s LIMIT 1".format(m=mode),
+			[__score.rankedScoreIncrease, userID])
+
+		# Update accuracy
+		updateAccuracyAP(userID, __score.gameMode)
+
+		# Update pp
+		updatePPAutopilot(userID, __score.gameMode)
 
 def updateLatestActivity(userID):
 	"""
@@ -968,6 +1197,28 @@ def getTotalScore(userID, gameMode):
 	modeForDB = gameModes.getGameModeForDB(gameMode)
 	return glob.db.fetch("SELECT total_score_"+modeForDB+" FROM users_stats WHERE id = %s LIMIT 1", [userID])["total_score_"+modeForDB]
 
+def getTotalScoreRX(userID, gameMode):
+	"""
+	Get `userID`'s total score relative to `gameMode`
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: total score
+	"""
+	modeForDB = gameModes.getGameModeForDB(gameMode)
+	return glob.db.fetch("SELECT total_score_"+modeForDB+" FROM rx_stats WHERE id = %s LIMIT 1", [userID])["total_score_"+modeForDB]
+
+def getTotalScoreAP(userID, gameMode):
+	"""
+	Get `userID`'s total score relative to `gameMode`
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: total score
+	"""
+	modeForDB = gameModes.getGameModeForDB(gameMode)
+	return glob.db.fetch("SELECT total_score_"+modeForDB+" FROM ap_stats WHERE id = %s LIMIT 1", [userID])["total_score_"+modeForDB]
+
 def getAccuracy(userID, gameMode):
 	"""
 	Get `userID`'s average accuracy relative to `gameMode`
@@ -978,6 +1229,28 @@ def getAccuracy(userID, gameMode):
 	"""
 	modeForDB = gameModes.getGameModeForDB(gameMode)
 	return glob.db.fetch("SELECT avg_accuracy_"+modeForDB+" FROM users_stats WHERE id = %s LIMIT 1", [userID])["avg_accuracy_"+modeForDB]
+
+def getAccuracyRX(userID, gameMode):
+	"""
+	Get `userID`'s average accuracy relative to `gameMode`
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: accuracy
+	"""
+	modeForDB = gameModes.getGameModeForDB(gameMode)
+	return glob.db.fetch("SELECT avg_accuracy_"+modeForDB+" FROM rx_stats WHERE id = %s LIMIT 1", [userID])["avg_accuracy_"+modeForDB]
+
+def getAccuracyAP(userID, gameMode):
+	"""
+	Get `userID`'s average accuracy relative to `gameMode`
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: accuracy
+	"""
+	modeForDB = gameModes.getGameModeForDB(gameMode)
+	return glob.db.fetch("SELECT avg_accuracy_"+modeForDB+" FROM ap_stats WHERE id = %s LIMIT 1", [userID])["avg_accuracy_"+modeForDB]
 
 def getGameRank(userID, gameMode):
 	"""
@@ -1005,6 +1278,19 @@ def getGameRankRx(userID, gameMode):
 		return 0
 	else:
 		return int(position) + 1
+	
+def getGameRankAp(userID, gameMode):
+	"""
+	Get `userID`'s **in-game rank** (eg: #1337) relative to gameMode
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: game rank
+	"""
+	position = glob.redis.zrevrank("ripple:leaderboard_autopilot:{}".format(gameModes.getGameModeForDB(gameMode)), userID)
+	if position is None:
+		return 0
+	else:
+		return int(position) + 1
 
 def getPlaycount(userID, gameMode):
 	"""
@@ -1026,7 +1312,18 @@ def getPlaycountRX(userID, gameMode):
 	:return: playcount
 	"""
 	modeForDB = gameModes.getGameModeForDB(gameMode)
-	return glob.db.fetch("SELECT playcount_"+modeForDB+" FROM rx_stats WHERE id = %s LIMIT 1", [userID])["playcount_"+modeForDB]	
+	return glob.db.fetch("SELECT playcount_"+modeForDB+" FROM rx_stats WHERE id = %s LIMIT 1", [userID])["playcount_"+modeForDB]
+
+def getPlaycountAP(userID, gameMode):
+	"""
+	Get `userID`'s playcount relative to `gameMode`
+ 
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: playcount
+	"""
+	modeForDB = gameModes.getGameModeForDB(gameMode)
+	return glob.db.fetch("SELECT playcount_"+modeForDB+" FROM ap_stats WHERE id = %s LIMIT 1", [userID])["playcount_"+modeForDB]
 	
 def getFriendList(userID):
 	"""
