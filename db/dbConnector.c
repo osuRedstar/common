@@ -3,12 +3,12 @@
 /* BEGIN: Cython Metadata
 {
     "distutils": {
-        "name": "common\\db\\dbConnector",
+        "name": "common.db.dbConnector",
         "sources": [
-            "common\\db\\dbConnector.pyx"
+            "./common\\db/dbConnector.pyx"
         ]
     },
-    "module_name": "common\\db\\dbConnector"
+    "module_name": "common.db.dbConnector"
 }
 END: Cython Metadata */
 
