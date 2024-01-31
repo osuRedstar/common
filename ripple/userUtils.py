@@ -1286,7 +1286,7 @@ def getGameRankAp(userID, gameMode):
 	:param gameMode: game mode number
 	:return: game rank
 	"""
-	position = glob.redis.zrevrank("ripple:leaderboard_autopilot:{}".format(gameModes.getGameModeForDB(gameMode)), userID)
+	position = glob.redis.zrevrank("ripple:leaderboard_ap:{}".format(gameModes.getGameModeForDB(gameMode)), userID)
 	if position is None:
 		return 0
 	else:
