@@ -13,7 +13,7 @@
 			"NIGHTCORE": true,
 			"FLASHLIGHT": true,
 			"SPUNOUT": true,
-			"RELAX2": false,
+			"RELAX2": true,
 			"PERFECT": true,
 			"KEY1": true,
 			"KEY2": true,
@@ -34,8 +34,9 @@
 	},
 	"lets": {
 		"submit": {
-			"max-std-rx-pp": 5000,
 			"max-std-pp": 1200,
+			"max-std-rx-pp": 5000,
+			"max-std-ap-pp": 3800,
 			"score-overwrite": "pp"
 		},
 		"allowed-beatmap-rankstatus": {
