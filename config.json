@@ -35,7 +35,7 @@
 	"lets": {
 		"submit": {
 			"max-std-rx-pp": 5000,
-			"max-std-pp": 950,
+			"max-std-pp": 1200,
 			"score-overwrite": "pp"
 		},
 		"allowed-beatmap-rankstatus": {
