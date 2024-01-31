@@ -485,7 +485,7 @@ def calculateAccuracyAP(userID, gameMode):
 		sortby = "accuracy"
 	# Get best accuracy scores
 	bestAccScores = glob.db.fetchAll(
-		"SELECT accuracy FROM scores_autopilot WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY " + sortby + " DESC LIMIT 500",
+		"SELECT accuracy FROM scores_ap WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY " + sortby + " DESC LIMIT 500",
 		[userID, gameMode])
  
 	v = 0
@@ -616,7 +616,7 @@ def calculatePPAutopilot(userID, gameMode, limit=500):
 	totalPP = glob.db.fetch(
 		f"""select sum(ROUND(ROUND(DD.pp) * pow(0.95,  (DD.RANKING-1)))) as pp
 		from(SELECT ROW_NUMBER() OVER(ORDER BY pp DESC) AS RANKING, userid,pp
-		FROM scores_autopilot WHERE beatmap_md5 in
+		FROM scores_ap WHERE beatmap_md5 in
 		(select beatmap_md5 from beatmaps where ranked = 2 OR ranked = 3) AND userid = {userID} AND play_mode = {gameMode} AND completed = 3 LIMIT {limit}) as DD;""")
 	totalPP = totalPP["pp"]
 	gm = scoreUtils.readableGameMode(gameMode)
@@ -628,10 +628,10 @@ def calculatePPAutopilot(userID, gameMode, limit=500):
 
 	# Get best pp scores
 	""" bestPPScores = glob.db.fetchAll(
-		"SELECT pp FROM scores_autopilot WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
+		"SELECT pp FROM scores_ap WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
 		[userID, gameMode]) """
 	bestPPScores = glob.db.fetchAll(
-		"SELECT pp, beatmap_md5 FROM scores_autopilot WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
+		"SELECT pp, beatmap_md5 FROM scores_ap WHERE userid = %s AND play_mode = %s AND completed = 3 ORDER BY pp DESC LIMIT 500",
 		[userID, gameMode])
 
 	gm = scoreUtils.readableGameMode(gameMode)
