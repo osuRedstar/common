@@ -136,18 +136,24 @@ def hexString(s):
 def readableMods(__mods):
 	# TODO: same as common.scoreUtils.readableMods. Remove this or the other one.
 	r = ""
-	if __mods == 0:
+	if __mods == mods.NOMOD:
 		return r
 	if __mods & mods.NOFAIL > 0:
 		r += "NF"
 	if __mods & mods.EASY > 0:
 		r += "EZ"
+	if __mods & mods.TOUCHSCREEN > 0:
+		r += "TD"
 	if __mods & mods.HIDDEN > 0:
 		r += "HD"
 	if __mods & mods.HARDROCK > 0:
 		r += "HR"
+	if __mods & mods.SUDDENDEATH > 0:
+		r += "SD"
 	if __mods & mods.DOUBLETIME > 0:
 		r += "DT"
+	if __mods & mods.RELAX > 0:
+		r += "RX"
 	if __mods & mods.HALFTIME > 0:
 		r += "HT"
 	#NC 추가
@@ -157,16 +163,15 @@ def readableMods(__mods):
 		#r += "NC, "
 	if __mods & mods.FLASHLIGHT > 0:
 		r += "FL"
+	if __mods & mods.AUTOPLAY > 0:
+		r += "AU(AUTO)"
 	if __mods & mods.SPUNOUT > 0:
 		r += "SO"
-	#모드 추가
-	if __mods & mods.PERFECT > 0:
-		r += "PF"
-	#?????
-	if __mods & mods.RELAX > 0:
-		r += "RX"
 	if __mods & mods.RELAX2 > 0:
 		r += "AP"
+	if __mods & mods.PERFECT > 0:
+		r += "PF"
+	#모드 추가
 	if __mods & mods.KEY4 > 0:
 		r += "K4"
 	if __mods & mods.KEY5 > 0:
