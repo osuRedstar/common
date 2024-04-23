@@ -24,8 +24,6 @@ def getBeatmapTime(beatmapID):
 
 def PPBoard(userID, modsType):
 	result = glob.db.fetch("SELECT ppboard FROM {rx}_stats WHERE id = {userid}".format(rx="rx" if modsType == "rx" else ("ap" if modsType == "ap" else "users"), userid=userID))
-	log.chat("SELECT ppboard FROM {rx}_stats WHERE id = {userid}".format(rx="rx" if modsType == "rx" else ("ap" if modsType == "ap" else "users"), userid=userID))
-	log.chat(f"board result = {result}")
 	return result['ppboard']
 
 def setPPBoard(userID, modsType, force=False):
