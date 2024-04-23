@@ -20,19 +20,20 @@ def getBeatmapTime(beatmapID):
 	r = requests.get("https://cheesegull.redstar.moe/api/b/{}".format(beatmapID)).text
 	if r != "null\n":
 		p = json.loads(r)['TotalLength']
- 
 	return p
 
-def PPBoard(userID, relax):
-	result = glob.db.fetch("SELECT ppboard FROM {rx}_stats WHERE id = {userid}".format(rx='rx' if relax else 'users', userid=userID))
+def PPBoard(userID, modsType):
+	result = glob.db.fetch("SELECT ppboard FROM {rx}_stats WHERE id = {userid}".format(rx="rx" if modsType == "rx" else ("ap" if modsType == "ap" else "users"), userid=userID))
+	log.chat("SELECT ppboard FROM {rx}_stats WHERE id = {userid}".format(rx="rx" if modsType == "rx" else ("ap" if modsType == "ap" else "users"), userid=userID))
+	log.chat(f"board result = {result}")
 	return result['ppboard']
 
-def setPPBoard(userID, rx, force=False):
-	glob.db.execute("UPDATE {rx}_stats SET ppboard = {boardNum} WHERE id = {userid}".format(rx='rx' if rx else 'users', boardNum="1" if not force else "2", userid=userID))
+def setPPBoard(userID, modsType, force=False):
+	glob.db.execute("UPDATE {rx}_stats SET ppboard = {boardNum} WHERE id = {userid}".format(rx='rx' if modsType == "rx" else ("ap" if modsType == "ap" else "users"), boardNum="1" if not force else "2", userid=userID))
 
-def setScoreBoard(userID, rx, force=False):
-	glob.db.execute("UPDATE {rx}_stats SET ppboard = {boardNum} WHERE id = {userid}".format(rx='rx' if rx else 'users', boardNum="0" if not force else "3", userid=userID))
- 
+def setScoreBoard(userID, modsType, force=False):
+	glob.db.execute("UPDATE {rx}_stats SET ppboard = {boardNum} WHERE id = {userid}".format(rx='rx' if modsType == "rx" else ("ap" if modsType == "ap" else "users"), boardNum="0" if not force else "3", userid=userID))
+
 def incrementPlaytime(userID, gameMode=0, length=0):
 	modeForDB = gameModes.getGameModeForDB(gameMode)
 	result = glob.db.fetch("SELECT playtime_{gm} as playtime FROM users_stats WHERE id = %s".format(gm=modeForDB), [userID])
