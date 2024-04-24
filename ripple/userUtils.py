@@ -877,6 +877,36 @@ def getRankedScore(userID, gameMode):
 		return result["ranked_score_{}".format(mode)]
 	else:
 		return 0
+	
+def getRankedScoreRX(userID, gameMode):
+	"""
+	Get userID's ranked score relative to gameMode
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: ranked score
+	"""
+	mode = scoreUtils.readableGameMode(gameMode)
+	result = glob.db.fetch("SELECT ranked_score_{} FROM rx_stats WHERE id = %s LIMIT 1".format(mode), [userID])
+	if result is not None:
+		return result["ranked_score_{}".format(mode)]
+	else:
+		return 0
+	
+def getRankedScoreAP(userID, gameMode):
+	"""
+	Get userID's ranked score relative to gameMode
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return: ranked score
+	"""
+	mode = scoreUtils.readableGameMode(gameMode)
+	result = glob.db.fetch("SELECT ranked_score_{} FROM ap_stats WHERE id = %s LIMIT 1".format(mode), [userID])
+	if result is not None:
+		return result["ranked_score_{}".format(mode)]
+	else:
+		return 0
 
 def getPP(userID, gameMode):
 	"""
@@ -937,6 +967,32 @@ def incrementReplaysWatched(userID, gameMode):
 	mode = scoreUtils.readableGameMode(gameMode)
 	glob.db.execute(
 		"UPDATE users_stats SET replays_watched_{mode}=replays_watched_{mode}+1 WHERE id = %s LIMIT 1".format(
+			mode=mode), [userID])
+	
+def incrementReplaysWatchedRX(userID, gameMode):
+	"""
+	Increment userID's replays watched by others relative to gameMode
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return:
+	"""
+	mode = scoreUtils.readableGameMode(gameMode)
+	glob.db.execute(
+		"UPDATE rx_stats SET replays_watched_{mode}=replays_watched_{mode}+1 WHERE id = %s LIMIT 1".format(
+			mode=mode), [userID])
+	
+def incrementReplaysWatchedAP(userID, gameMode):
+	"""
+	Increment userID's replays watched by others relative to gameMode
+
+	:param userID: user id
+	:param gameMode: game mode number
+	:return:
+	"""
+	mode = scoreUtils.readableGameMode(gameMode)
+	glob.db.execute(
+		"UPDATE ap_stats SET replays_watched_{mode}=replays_watched_{mode}+1 WHERE id = %s LIMIT 1".format(
 			mode=mode), [userID])
 
 def getAqn(userID):
