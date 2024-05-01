@@ -15,12 +15,10 @@ from objects import glob
 
 
 def getBeatmapTime(beatmapID):
-	p = 0
-	#r = requests.get("https://redstar.moe/api/get_beatmaps?b={}".format(beatmapID)).text
-	r = requests.get("https://cheesegull.redstar.moe/api/b/{}".format(beatmapID)).text
-	if r != "null\n":
-		p = json.loads(r)['TotalLength']
-	return p
+	try:
+		return requests.get(f"{glob.conf.config['cheesegull']['apiurl']}/b/{beatmapID}").json()["TotalLength"]
+	except:
+		return 0
 
 def PPBoard(userID, modsType):
 	result = glob.db.fetch("SELECT ppboard FROM {rx}_stats WHERE id = {userid}".format(rx="rx" if modsType == "rx" else ("ap" if modsType == "ap" else "users"), userid=userID))
@@ -166,6 +164,34 @@ def getMaxCombo(userID, gameMode):
 	"""
 	# Get stats
 	maxcombo = glob.db.fetch("SELECT max_combo FROM scores WHERE userid = %s AND play_mode = %s ORDER BY max_combo DESC LIMIT 1", [userID, gameMode])
+ 
+	# Return stats + game rank
+	return maxcombo["max_combo"]
+
+def getMaxComboRx(userID, gameMode):
+	"""
+	Get all user stats relative to `gameMode`
+ 
+	:param userID:
+	:param gameMode: game mode number
+	:return: dictionary with result
+	"""
+	# Get stats
+	maxcombo = glob.db.fetch("SELECT max_combo FROM scores_relax WHERE userid = %s AND play_mode = %s ORDER BY max_combo DESC LIMIT 1", [userID, gameMode])
+ 
+	# Return stats + game rank
+	return maxcombo["max_combo"]
+
+def getMaxComboAp(userID, gameMode):
+	"""
+	Get all user stats relative to `gameMode`
+ 
+	:param userID:
+	:param gameMode: game mode number
+	:return: dictionary with result
+	"""
+	# Get stats
+	maxcombo = glob.db.fetch("SELECT max_combo FROM scores_ap WHERE userid = %s AND play_mode = %s ORDER BY max_combo DESC LIMIT 1", [userID, gameMode])
  
 	# Return stats + game rank
 	return maxcombo["max_combo"]
