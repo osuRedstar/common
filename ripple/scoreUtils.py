@@ -43,38 +43,38 @@ def readableMods(__mods: int):
 	:return: readable mods string, eg HDDT
 	"""
 	r = ""
-	if __mods == mods.NOMOD: return r
-	if __mods & mods.NOFAIL > 0: r += "NF"
-	if __mods & mods.EASY > 0: r += "EZ"
-	if __mods & mods.TOUCHSCREEN > 0: r += "TD"
-	if __mods & mods.HIDDEN > 0: r += "HD"
-	if __mods & mods.HARDROCK > 0: r += "HR"
-	if __mods & mods.SUDDENDEATH > 0: r += "SD"
-	if __mods & mods.DOUBLETIME > 0: r += "DT"
-	if __mods & mods.RELAX > 0: r += "RX"
-	if __mods & mods.HALFTIME > 0: r += "HT"
-	if __mods & mods.NIGHTCORE > 0 or __mods & 576 > 0: r = r.replace("DT", "NC") #576 = DT, NC
-	if __mods & mods.FLASHLIGHT > 0: r += "FL"
-	if __mods & mods.AUTOPLAY > 0: r += "AU(AUTO)"
-	if __mods & mods.SPUNOUT > 0: r += "SO"
-	if __mods & mods.RELAX2 > 0: r += "AP"
-	if __mods & mods.PERFECT > 0 or __mods & 16416 > 0: r = r.replace("SD", "PF") #16416 = SD, PF
-	if __mods & mods.KEY4 > 0: r += "K4"
-	if __mods & mods.KEY5 > 0: r += "K5"
-	if __mods & mods.KEY6 > 0: r += "K6"
-	if __mods & mods.KEY7 > 0: r += "K7"
-	if __mods & mods.KEY8 > 0: r += "K8"
-	if __mods & mods.KEYMOD > 0: r += "KEYMOD" #?
-	if __mods & mods.FADEIN > 0: r += "FI"
-	if __mods & mods.RANDOM > 0: r += "RD"
-	if __mods & mods.LASTMOD > 0: r += "LASTMOD" #?
-	if __mods & mods.KEY9 > 0: r += "K9"
-	if __mods & mods.KEY10 > 0: r += "K10"
-	if __mods & mods.KEY1 > 0: r += "K1"
-	if __mods & mods.KEY3 > 0: r += "K3"
-	if __mods & mods.KEY2 > 0: r += "K2"
-	if __mods & mods.SCOREV2 > 0: r += "SV2(v2)"
-	if __mods & mods.MIRROR > 0: r += "MR"
+	if __mods == mods.NOMOD: return ""
+	if __mods & mods.NOFAIL: r += "NF"
+	if __mods & mods.EASY: r += "EZ"
+	if __mods & mods.TOUCHSCREEN: r += "TD"
+	if __mods & mods.HIDDEN: r += "HD"
+	if __mods & mods.HARDROCK: r += "HR"
+	if __mods & mods.SUDDENDEATH: r += "SD"
+	if __mods & mods.DOUBLETIME: r += "DT"
+	if __mods & mods.RELAX: r += "RX"
+	if __mods & mods.HALFTIME: r += "HT"
+	if __mods & mods.NIGHTCORE: r = r.replace("DT", "NC") if "DT" in r else r + "NC" #576 = DT, NC
+	if __mods & mods.FLASHLIGHT: r += "FL"
+	if __mods & mods.AUTOPLAY: r += "AU(AUTO)"
+	if __mods & mods.SPUNOUT: r += "SO"
+	if __mods & mods.RELAX2: r += "AP"
+	if __mods & mods.PERFECT: r = r.replace("SD", "PF") if "SD" in r else r + "PF" #16416 = SD, PF
+	if __mods & mods.KEY4: r += "K4"
+	if __mods & mods.KEY5: r += "K5"
+	if __mods & mods.KEY6: r += "K6"
+	if __mods & mods.KEY7: r += "K7"
+	if __mods & mods.KEY8: r += "K8"
+	if __mods & mods.KEYMOD: r += "KEYMOD" #?
+	if __mods & mods.FADEIN: r += "FI"
+	if __mods & mods.RANDOM: r += "RD"
+	if __mods & mods.LASTMOD: r += "LASTMOD" #?
+	if __mods & mods.KEY9: r += "K9"
+	if __mods & mods.KEY10: r += "K10"
+	if __mods & mods.KEY1: r += "K1"
+	if __mods & mods.KEY3: r += "K3"
+	if __mods & mods.KEY2: r += "K2"
+	if __mods & mods.SCOREV2: r += "SV2(v2)"
+	if __mods & mods.MIRROR: r += "MR"
 	return r
 
 def readableModsReverse(__mods: str):
