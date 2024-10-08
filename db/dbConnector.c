@@ -5,7 +5,7 @@
     "distutils": {
         "name": "common.db.dbConnector",
         "sources": [
-            "./common\\db/dbConnector.pyx"
+            "./common/db/dbConnector.pyx"
         ]
     },
     "module_name": "common.db.dbConnector"
@@ -735,7 +735,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "common\\db\\dbConnector.pyx",
+  "common/db/dbConnector.pyx",
 };
 
 /*--- Type declarations ---*/
@@ -1212,7 +1212,7 @@ static const char __pyx_k_A_single_MySQL_worker[] = "\n\tA single MySQL worker\n
 static const char __pyx_k_common_db_dbConnector[] = "common.db.dbConnector";
 static const char __pyx_k_connectionsPool___init[] = "connectionsPool.__init__";
 static const char __pyx_k_connectionsPool_fillPool[] = "connectionsPool.fillPool";
-static const char __pyx_k_common_db_dbConnector_pyx[] = "common\\db\\dbConnector.pyx";
+static const char __pyx_k_common_db_dbConnector_pyx[] = "common/db/dbConnector.pyx";
 static const char __pyx_k_connectionsPool_getWorker[] = "connectionsPool.getWorker";
 static const char __pyx_k_connectionsPool_newWorker[] = "connectionsPool.newWorker";
 static const char __pyx_k_connectionsPool_putWorker[] = "connectionsPool.putWorker";
