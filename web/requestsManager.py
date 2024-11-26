@@ -48,14 +48,10 @@ class asyncRequestHandler(SentryMixin, tornado.web.RequestHandler):
 
 		:return: Client IP address
 		"""
-		if "X-Real-IP" in self.request.headers:
-			return self.request.headers.get("X-Real-IP")
-		if "CF-Connecting-IP" in self.request.headers:
-			return self.request.headers.get("CF-Connecting-IP")
-		elif "X-Forwarded-For" in self.request.headers:
-			return self.request.headers.get("X-Forwarded-For")
-		else:
-			return self.request.remote_ip
+		if "X-Real-IP" in self.request.headers: return self.request.headers.get("X-Real-IP")
+		elif "CF-Connecting-IP" in self.request.headers: return self.request.headers.get("CF-Connecting-IP")
+		elif "X-Forwarded-For" in self.request.headers: return self.request.headers.get("X-Forwarded-For")
+		else: return self.request.remote_ip
 
 
 def runBackground(data, callback):
