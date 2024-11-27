@@ -107,7 +107,7 @@ def info(message, discord = None, alertDev = False):
 	"""
 	logMessage(message, "INFO", bcolors.ENDC, discord, alertDev)
 
-def debug(message):
+def debug(message, debug2=False):
 	"""
 	Log a debug message to stdout.
 	Works only if the server is running in debug mode.
@@ -115,8 +115,10 @@ def debug(message):
 	:param message: debug message
 	:return:
 	"""
-	if glob.debug:
+	if glob.debug or debug2:
 		logMessage(message, "DEBUG", bcolors.PINK)
+
+def debug2(message): return debug(message, debug2=True)
 
 def chat(message):
 	"""
