@@ -16,6 +16,9 @@ class asyncRequestHandler(SentryMixin, tornado.web.RequestHandler):
 	use asyncGet() and asyncPost() instead of get() and post().
 	Done. I'm not kidding.
 	"""
+
+	def prepare(self): self.clear_header("Content-Type")
+
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def get(self, *args, **kwargs):
