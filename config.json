@@ -36,7 +36,7 @@
 		"submit": {
 			"max-std-pp": 1000,
 			"max-std-rx-pp": 5000,
-			"max-std-ap-pp": 2000,
+			"max-std-ap-pp": 3000,
 			"score-overwrite": "pp"
 		},
 		"allowed-beatmap-rankstatus": {
