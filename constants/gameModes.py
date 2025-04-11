@@ -11,14 +11,10 @@ def getGameModeForDB(gameMode):
 	:return: game mode readable string for db
 	"""
 
-	if gameMode == STD:
-		return "std"
-	elif gameMode == TAIKO:
-		return "taiko"
-	elif gameMode == CTB:
-		return "ctb"
-	else:
-		return "mania"
+	if gameMode == STD: return "std"
+	elif gameMode == TAIKO: return "taiko"
+	elif gameMode == CTB: return "ctb"
+	else: return "mania"
 
 def getGamemodeFull(gameMode):
 	"""
@@ -27,14 +23,10 @@ def getGamemodeFull(gameMode):
 	:param gameMode: game mode number
 	:return: game mode readable name
 	"""
-	if gameMode == STD:
-		return "osu!"
-	elif gameMode == TAIKO:
-		return "Taiko"
-	elif gameMode == CTB:
-		return "Catch The Beat"
-	else:
-		return "osu!mania"
+	if gameMode == STD: return "osu!"
+	elif gameMode == TAIKO: return "Taiko"
+	elif gameMode == CTB: return "Catch The Beat"
+	else: return "osu!mania"
 
 def getGameModeForPrinting(gameMode):
 	"""
@@ -43,11 +35,7 @@ def getGameModeForPrinting(gameMode):
 	:param gameMode: gameMode int or variable (ex: gameMode.std)
 	:return: game mode readable string for a human
 	"""
-	if gameMode == STD:
-		return "osu!"
-	elif gameMode == TAIKO:
-		return "Taiko"
-	elif gameMode == CTB:
-		return "CatchTheBeat"
-	else:
-		return "osu!mania"
+	if gameMode == STD: return "osu!"
+	elif gameMode == TAIKO: return "Taiko"
+	elif gameMode == CTB: return "CatchTheBeat"
+	else: return "osu!mania"
