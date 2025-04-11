@@ -1,18 +1,14 @@
 import time
 import requests
 import json
-try:
-    from pymysql.err import ProgrammingError
-except ImportError:
-    from MySQLdb._exceptions import ProgrammingError
-
+try: from pymysql.err import ProgrammingError
+except ImportError: from MySQLdb._exceptions import ProgrammingError
 from common import generalUtils
 from common.constants import gameModes
 from common.constants import privileges
 from common.log import logUtils as log
 from common.ripple import passwordUtils, scoreUtils
 from objects import glob
-
 
 def getBeatmapTime(beatmapID):
 	try:
