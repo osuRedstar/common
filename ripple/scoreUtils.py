@@ -25,14 +25,10 @@ def readableGameMode(gameMode):
 	:return:
 	"""
 	# TODO: Same as common.constants.gameModes.getGameModeForDB, remove one
-	if gameMode == 0:
-		return "std"
-	elif gameMode == 1:
-		return "taiko"
-	elif gameMode == 2:
-		return "ctb"
-	else:
-		return "mania"
+	if gameMode == 0: return "std"
+	elif gameMode == 1: return "taiko"
+	elif gameMode == 2: return "ctb"
+	else: return "mania"
 
 def readableMods(__mods: int):
 	"""
@@ -64,12 +60,12 @@ def readableMods(__mods: int):
 	if __mods & mods.KEY6: r += "K6"
 	if __mods & mods.KEY7: r += "K7"
 	if __mods & mods.KEY8: r += "K8"
-	if __mods & mods.KEYMOD: r += "KEYMOD" #?
+	#if __mods & mods.KEYMOD: r += "KEYMOD" #?
 	if __mods & mods.FADEIN: r += "FI"
 	if __mods & mods.RANDOM: r += "RD"
-	if __mods & mods.LASTMOD: r += "LASTMOD" #?
+	#if __mods & mods.LASTMOD: r += "LASTMOD" #?
 	if __mods & mods.KEY9: r += "K9"
-	if __mods & mods.KEY10: r += "K10"
+	if __mods & mods.KEY10: r += "CP"
 	if __mods & mods.KEY1: r += "K1"
 	if __mods & mods.KEY3: r += "K3"
 	if __mods & mods.KEY2: r += "K2"
@@ -78,42 +74,40 @@ def readableMods(__mods: int):
 	return r
 
 def readableModsReverse(__mods: str):
-    if len(__mods.upper().replace("K10", "")) % 2: __mods = "^^"
-    if "K10" in __mods: __mods = __mods.replace("K10", "") + "K10"
-    modsEnum = 0
-    for r in [__mods[i:i+3].upper() if __mods[i:i+3].upper() == "K10" else __mods[i:i+2].upper() for i in range(0, len(__mods) if not "K10" in __mods else len(__mods) - 1, 2)]:
-        if r not in ["NO", "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "HT", "NC", "FL", "SO", "PF", "RX", "AP", "K4", "K5", "K6", "K7", "K8", "FI", "RD", "K9", "K10", "K1", "K3", "K2", "v2", "MR"]:
-            return "Invalid mods. Allowed mods: NO, NF, EZ, TD, HD, HR, SD, DT, HT, NC, FL, SO, PF, RX, AP, K4, K5, K6, K7, K8, FI, RD, K9, K10, K1, K3, K2, v2(SV2), MR. Do not use spaces for multiple mods."
-        if r == "NO": return 0
-        elif r == "NF": modsEnum += mods.NOFAIL
-        elif r == "EZ": modsEnum += mods.EASY
-        elif r == "TD": modsEnum += mods.TOUCHSCREEN
-        elif r == "HD": modsEnum += mods.HIDDEN
-        elif r == "HR": modsEnum += mods.HARDROCK
-        elif r == "SD": modsEnum += mods.SUDDENDEATH
-        elif r == "DT": modsEnum += mods.DOUBLETIME
-        elif r == "RX": modsEnum += mods.RELAX
-        elif r == "HT": modsEnum += mods.HALFTIME
-        elif r == "NC": modsEnum += 576 #576 = DT, NC
-        elif r == "FL": modsEnum += mods.FLASHLIGHT
-        elif r == "AT": modsEnum += mods.AUTOPLAY
-        elif r == "SO": modsEnum += mods.SPUNOUT
-        elif r == "AP": modsEnum += mods.RELAX2
-        elif r == "PF": modsEnum += 16416 #16416 = SD, PF
-        elif r == "K4": modsEnum += mods.KEY4
-        elif r == "K5": modsEnum += mods.KEY5
-        elif r == "K6": modsEnum += mods.KEY6
-        elif r == "K7": modsEnum += mods.KEY7
-        elif r == "K8": modsEnum += mods.k8
-        #elif r == "KEYMOD": modsEnum += mods.KEYMOD
-        elif r == "FI": modsEnum += mods.FADEIN
-        elif r == "RD": modsEnum += mods.RANDOM
-        #elif r == "LASTMOD": modsEnum += mods.LASTMOD
-        elif r == "K9": modsEnum += mods.KEY9
-        elif r == "K10": modsEnum += mods.KEY10
-        elif r == "K1": modsEnum += mods.KEY1
-        elif r == "K3": modsEnum += mods.KEY3
-        elif r == "K2": modsEnum += mods.KEY2
-        elif r == "v2": modsEnum += mods.SCOREV2
-        elif r == "MR": modsEnum += mods.MIRROR
-    return modsEnum
+	modsEnum = 0
+	for r in [__mods[i:i+2].upper() for i in range(0, len(__mods), 2)]:
+		if r not in ["NO", "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "HT", "NC", "FL", "SO", "PF", "RX", "AP", "K4", "K5", "K6", "K7", "K8", "FI", "RD", "K9", "CP", "K1", "K3", "K2", "v2", "MR"]:
+			return "Invalid mods. Allowed mods: NO, NF, EZ, TD, HD, HR, SD, DT, HT, NC, FL, SO, PF, RX, AP, K4, K5, K6, K7, K8, FI, RD, K9, CP, K1, K3, K2, v2(SV2), MR. Do not use spaces for multiple mods."
+		if r == "NO": return 0
+		elif r == "NF": modsEnum += mods.NOFAIL
+		elif r == "EZ": modsEnum += mods.EASY
+		elif r == "TD": modsEnum += mods.TOUCHSCREEN
+		elif r == "HD": modsEnum += mods.HIDDEN
+		elif r == "HR": modsEnum += mods.HARDROCK
+		elif r == "SD": modsEnum += mods.SUDDENDEATH
+		elif r == "DT": modsEnum += mods.DOUBLETIME
+		elif r == "RX": modsEnum += mods.RELAX
+		elif r == "HT": modsEnum += mods.HALFTIME
+		elif r == "NC": modsEnum += mods.NIGHTCORE + mods.DOUBLETIME #576 #576 = DT, NC
+		elif r == "FL": modsEnum += mods.FLASHLIGHT
+		elif r == "AT": modsEnum += mods.AUTOPLAY
+		elif r == "SO": modsEnum += mods.SPUNOUT
+		elif r == "AP": modsEnum += mods.RELAX2
+		elif r == "PF": modsEnum += mods.PERFECT + mods.SUDDENDEATH #16416 #16416 = SD, PF
+		elif r == "K4": modsEnum += mods.KEY4
+		elif r == "K5": modsEnum += mods.KEY5
+		elif r == "K6": modsEnum += mods.KEY6
+		elif r == "K7": modsEnum += mods.KEY7
+		elif r == "K8": modsEnum += mods.k8
+		#elif r == "KEYMOD": modsEnum += mods.KEYMOD
+		elif r == "FI": modsEnum += mods.FADEIN
+		elif r == "RD": modsEnum += mods.RANDOM
+		#elif r == "LASTMOD": modsEnum += mods.LASTMOD
+		elif r == "K9": modsEnum += mods.KEY9
+		elif r == "CP": modsEnum += mods.KEY10
+		elif r == "K1": modsEnum += mods.KEY1
+		elif r == "K3": modsEnum += mods.KEY3
+		elif r == "K2": modsEnum += mods.KEY2
+		elif r == "v2": modsEnum += mods.SCOREV2
+		elif r == "MR": modsEnum += mods.MIRROR
+	return modsEnum
