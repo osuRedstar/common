@@ -35,20 +35,15 @@ repeated violation of the license could result in a legal fight.""",
 )
 
 
-class LicenseError(Exception):
-    pass
-
+class LicenseError(Exception): pass
 
 def check_license(namespace, project_name):
     license_folder_path = "{}/.config/".format(Path.home())
     if not os.path.isdir(license_folder_path):
-        try:
-            os.mkdir(license_folder_path, mode=0o755)
-        except OSError as e:
-            raise LicenseError("Cannot create .config dir: {}".format(e))
+        try: os.mkdir(license_folder_path, mode=0o755)
+        except OSError as e: raise LicenseError("Cannot create .config dir: {}".format(e))
     agreed_file_name = "{}/{}_license_agreed".format(license_folder_path, namespace)
-    if os.path.isfile(agreed_file_name):
-        return
+    if os.path.isfile(agreed_file_name): return
 
     print(
         "    {}, and most/all software related to {},\n"
@@ -56,15 +51,11 @@ def check_license(namespace, project_name):
     )
     for page in PAGES:
         print(" " * 4 + "\n" + page)
-        try:
-            input("\nPress Enter to continue")
-        except KeyboardInterrupt:
-            raise LicenseError("License not read. Quitting.")
+        try: input("\nPress Enter to continue")
+        except KeyboardInterrupt: raise LicenseError("Licensenot read. Quitting.")
 
     if input("\nPlease write 'I agree' to accept the terms of the license.\n").lower().strip() != "i agree":
         raise LicenseError("License not agreed. Quitting.")
 
-    try:
-        open(agreed_file_name, "a").close()
-    except IOError as e:
-        raise LicenseError("Couldn't save read status: {}".format(e))
+    try: open(agreed_file_name, "a").close()
+    except IOError as e: raise LicenseError("Couldn't save read status: {}".format(e))
