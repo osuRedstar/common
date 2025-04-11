@@ -22,16 +22,12 @@ def cheesegullRequest(handler, requestType="GET", key="https://osu.direct/api/",
 				if `wants` is a list of strings, return a dictionary containing the wanted keys.
 	"""
 	# Default values
-	if mustHave is None:
-		mustHave = []
-	if wants is None:
-		wants = []
-	if params is None:
-		params = {}
+	if mustHave is None: mustHave = []
+	if wants is None: wants = []
+	if params is None: params = {}
 
 	# Params and function
-	postData = None
-	getParams = None
+	postData = getParams = None
 	if requestType.lower() == "post":
 		f = requests.post
 		postData = params
@@ -45,33 +41,25 @@ def cheesegullRequest(handler, requestType="GET", key="https://osu.direct/api/",
 	log.debug(result.url)
 	# log.debug(str(result.text))
 
-	try:
-		data = json.loads(result.text)
-	except (json.JSONDecodeError, ValueError, requests.RequestException, KeyError, exceptions.noAPIDataError):
-		return None
+	try: data = json.loads(result.text)
+	except (json.JSONDecodeError, ValueError, requests.RequestException, KeyError, exceptions.noAPIDataError): return None
 
 	# Params and status check
-	if result.status_code != 200:
-		return None
+	if result.status_code != 200: return None
 	if mustHave is not None:
-		if type(mustHave) == str:
-			mustHave = [mustHave]
+		if type(mustHave) == str: mustHave = [mustHave]
 		for i in mustHave:
-			if i not in data:
-				return None
+			if i not in data: return None
 
 	# Return what we want
 	if type(wants) == str:
-		if wants in data:
-			return data[wants]
+		if wants in data: return data[wants]
 		return None
-	elif len(wants) == 0:
-		return data
+	elif len(wants) == 0: return data
 	else:
 		res = {}
 		for i in data:
-			if i in wants:
-				res[i] = data[i]
+			if i in wants: res[i] = data[i]
 		return res
 
 def getListing(rankedStatus, page, gameMode, query):
@@ -81,10 +69,8 @@ def getListing(rankedStatus, page, gameMode, query):
 		"offset": page,
 		"amount": 100
 	}
-	if rankedStatus is not None:
-		params["status"] = rankedStatus
-	if gameMode is not None:
-		params["mode"] = gameMode
+	if rankedStatus is not None: params["status"] = rankedStatus
+	if gameMode is not None: params["mode"] = gameMode
 	return cheesegullRequest("search", params=params)
 
 def getBeatmapSet(id):
@@ -94,8 +80,7 @@ def getBeatmapSet(id):
 def getBeatmap(id):
 	glob.dog.increment(glob.DATADOG_PREFIX + ".cheesegull_requests", tags=["cheesegull:beatmap"])
 	setID = cheesegullRequest("b/{}".format(id), wants="ParentSetID")
-	if setID is None or setID <= 0:
-		return None
+	if setID is None or setID <= 0: return None
 	return getBeatmapSet(setID)
 
 def updateBeatmap(setID):
@@ -139,19 +124,11 @@ def toDirectNp(data):
 	)
 
 def directToApiStatus(directStatus):
-	if directStatus is None:
-		return None
-	elif directStatus == 0 or directStatus == 7:
-		return [1, 2]
-	elif directStatus == 8:
-		return 4
-	elif directStatus == 3:
-		return 3
-	elif directStatus == 2:
-		return 0
-	elif directStatus == 5:
-		return -2
-	elif directStatus == 4:
-		return None
-	else:
-		return 1
+	if directStatus is None: return None
+	elif directStatus == 0 or directStatus == 7: return [1, 2]
+	elif directStatus == 8: return 4
+	elif directStatus == 3: return 3
+	elif directStatus == 2: return 0
+	elif directStatus == 5: return -2
+	elif directStatus == 4: return None
+	else: return 1
