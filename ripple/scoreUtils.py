@@ -30,7 +30,7 @@ def readableGameMode(gameMode):
 	elif gameMode == 2: return "ctb"
 	else: return "mania"
 
-def readableMods(__mods: int):
+def readableMods(__mods: int) -> str:
 	"""
 	Return a string with readable std mods.
 	Used to convert a mods number for oppai
@@ -42,7 +42,7 @@ def readableMods(__mods: int):
 	if __mods == mods.NOMOD: return ""
 	if __mods & mods.NOFAIL: r += "NF"
 	if __mods & mods.EASY: r += "EZ"
-	if __mods & mods.TOUCHSCREEN: r += "TD"
+	if __mods & mods.TOUCHSCREEN: r += "TD(NV)"
 	if __mods & mods.HIDDEN: r += "HD"
 	if __mods & mods.HARDROCK: r += "HR"
 	if __mods & mods.SUDDENDEATH: r += "SD"
@@ -65,7 +65,7 @@ def readableMods(__mods: int):
 	if __mods & mods.RANDOM: r += "RD"
 	#if __mods & mods.LASTMOD: r += "LASTMOD" #?
 	if __mods & mods.KEY9: r += "K9"
-	if __mods & mods.KEY10: r += "CP"
+	if __mods & mods.COOP: r += "CP"
 	if __mods & mods.KEY1: r += "K1"
 	if __mods & mods.KEY3: r += "K3"
 	if __mods & mods.KEY2: r += "K2"
@@ -73,7 +73,7 @@ def readableMods(__mods: int):
 	if __mods & mods.MIRROR: r += "MR"
 	return r
 
-def readableModsReverse(__mods: str):
+def readableModsReverse(__mods: str) -> int:
 	modsEnum = 0
 	for r in [__mods[i:i+2].upper() for i in range(0, len(__mods), 2)]:
 		if r not in ["NO", "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "HT", "NC", "FL", "SO", "PF", "RX", "AP", "K4", "K5", "K6", "K7", "K8", "FI", "RD", "K9", "CP", "K1", "K3", "K2", "v2", "MR"]:
@@ -104,7 +104,7 @@ def readableModsReverse(__mods: str):
 		elif r == "RD": modsEnum += mods.RANDOM
 		#elif r == "LASTMOD": modsEnum += mods.LASTMOD
 		elif r == "K9": modsEnum += mods.KEY9
-		elif r == "CP": modsEnum += mods.KEY10
+		elif r == "CP": modsEnum += mods.COOP
 		elif r == "K1": modsEnum += mods.KEY1
 		elif r == "K3": modsEnum += mods.KEY3
 		elif r == "K2": modsEnum += mods.KEY2
