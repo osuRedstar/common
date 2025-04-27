@@ -1218,6 +1218,15 @@ def appendNotes(userID, notes, addNl=True, trackDate=True):
 		notes = "\n{}".format(notes)
 	glob.db.execute("UPDATE users SET notes=CONCAT(COALESCE(notes, ''),%s) WHERE id = %s LIMIT 1", [notes, userID])
 
+def getBadges(userID: int) -> list:
+	"""
+	Return `userID`'s badges
+
+	:param userID: user id
+	:return: badges info
+	"""
+	return list(glob.db.fetchAll("SELECT ub.badge, b.name, b.icon FROM user_badges ub JOIN badges b ON ub.badge = b.id WHERE ub.user = %s", [userID]))
+
 def getPrivileges(userID):
 	"""
 	Return `userID`'s privileges
