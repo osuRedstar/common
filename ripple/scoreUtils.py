@@ -42,7 +42,7 @@ def readableMods(__mods: int) -> str:
 	if __mods == mods.NOMOD: return ""
 	if __mods & mods.NOFAIL: r += "NF"
 	if __mods & mods.EASY: r += "EZ"
-	if __mods & mods.TOUCHSCREEN: r += "TD(NV)"
+	if __mods & mods.TOUCHSCREEN: r += "TD" #(NV)
 	if __mods & mods.HIDDEN: r += "HD"
 	if __mods & mods.HARDROCK: r += "HR"
 	if __mods & mods.SUDDENDEATH: r += "SD"
@@ -51,7 +51,7 @@ def readableMods(__mods: int) -> str:
 	if __mods & mods.HALFTIME: r += "HT"
 	if __mods & mods.NIGHTCORE: r = r.replace("DT", "NC") if "DT" in r else r + "NC" #576 = DT, NC
 	if __mods & mods.FLASHLIGHT: r += "FL"
-	if __mods & mods.AUTOPLAY: r += "AU(AUTO)"
+	if __mods & mods.AUTOPLAY: r += "AT"
 	if __mods & mods.SPUNOUT: r += "SO"
 	if __mods & mods.RELAX2: r += "AP"
 	if __mods & mods.PERFECT: r = r.replace("SD", "PF") if "SD" in r else r + "PF" #16416 = SD, PF
@@ -69,15 +69,15 @@ def readableMods(__mods: int) -> str:
 	if __mods & mods.KEY1: r += "K1"
 	if __mods & mods.KEY3: r += "K3"
 	if __mods & mods.KEY2: r += "K2"
-	if __mods & mods.SCOREV2: r += "SV2(v2)"
+	if __mods & mods.SCOREV2: r += "V2" #(SV2)
 	if __mods & mods.MIRROR: r += "MR"
 	return r
 
 def readableModsReverse(__mods: str) -> int:
 	modsEnum = 0
 	for r in [__mods[i:i+2].upper() for i in range(0, len(__mods), 2)]:
-		if r not in ["NO", "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "HT", "NC", "FL", "SO", "PF", "RX", "AP", "K4", "K5", "K6", "K7", "K8", "FI", "RD", "K9", "CP", "K1", "K3", "K2", "v2", "MR"]:
-			return "Invalid mods. Allowed mods: NO, NF, EZ, TD, HD, HR, SD, DT, HT, NC, FL, SO, PF, RX, AP, K4, K5, K6, K7, K8, FI, RD, K9, CP, K1, K3, K2, v2(SV2), MR. Do not use spaces for multiple mods."
+		if r not in ["NO", "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "HT", "NC", "FL", "SO", "PF", "RX", "AP", "K4", "K5", "K6", "K7", "K8", "FI", "RD", "K9", "CP", "K1", "K3", "K2", "V2", "MR"]:
+			return "Invalid mods. Allowed mods: NO, NF, EZ, TD(NV), HD, HR, SD, DT, HT, NC, FL, SO, PF, RX, AP, K4, K5, K6, K7, K8, FI, RD, K9, CP, K1, K3, K2, V2(SV2), MR. Do not use spaces for multiple mods."
 		if r == "NO": return 0
 		elif r == "NF": modsEnum += mods.NOFAIL
 		elif r == "EZ": modsEnum += mods.EASY
@@ -108,6 +108,6 @@ def readableModsReverse(__mods: str) -> int:
 		elif r == "K1": modsEnum += mods.KEY1
 		elif r == "K3": modsEnum += mods.KEY3
 		elif r == "K2": modsEnum += mods.KEY2
-		elif r == "v2": modsEnum += mods.SCOREV2
+		elif r == "V2": modsEnum += mods.SCOREV2
 		elif r == "MR": modsEnum += mods.MIRROR
 	return modsEnum
